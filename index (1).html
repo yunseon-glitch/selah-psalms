@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selah · 시편 쉼표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700&family=Gowun+Batang:wght@400;700&family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #2b2722;
+    --ink-soft: #5a534a;
+    --paper: #f3eee3;
+    --paper-deep: #ece4d3;
+    --linen: #e3d8c2;
+    --moss: #4b5d44;
+    --moss-deep: #34422f;
+    --ember: #a8552f;
+    --gold: #b08d4f;
+    --line: rgba(43,39,34,0.14);
+    --shadow: rgba(43,39,34,0.18);
+    --rec-pulse: rgba(168,85,47,0.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background: var(--paper);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(176,141,79,0.07), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(75,93,68,0.06), transparent 50%);
+    color: var(--ink);
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 종이 텍스처 노이즈 */
+  body::before{
+    content:"";
+    position: fixed; inset:0;
+    pointer-events:none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    z-index: 0;
+  }
+
+  .stage{
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 56px 28px 80px;
+    z-index: 1;
+  }
+
+  /* ===== 헤더 ===== */
+  .masthead{
+    text-align:center;
+    margin-bottom: 8px;
+  }
+  .masthead .eyebrow{
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .masthead h1{
+    font-family: 'Gowun Batang', serif;
+    font-weight: 700;
+    font-size: 40px;
+    letter-spacing: 0.01em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .masthead h1 .selah-mark{
+    color: var(--ember);
+    font-style: italic;
+  }
+  .masthead .subtitle{
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+  .masthead .verse-divider{
+    width: 64px; height: 1px;
+    background: var(--gold);
+    margin: 22px auto;
+    opacity: 0.6;
+  }
+  .masthead .intent{
+    font-size: 13px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    max-width: 440px;
+    margin: 0 auto 4px;
+  }
+
+  /* ===== 날짜 / 진행 표시 ===== */
+  .progress-strip{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 14px;
+    margin: 40px 0 28px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+  }
+  .progress-strip .date{
+    font-weight: 500;
+  }
+  .progress-strip .dot{
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+  .progress-strip .count{
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== 시편 카드 ===== */
+  .psalm-card{
+    background: var(--paper-deep);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 44px 40px 36px;
+    position: relative;
+    box-shadow: 0 1px 2px var(--shadow), 0 18px 40px -28px var(--shadow);
+  }
+  .psalm-card::before{
+    content:"";
+    position:absolute;
+    left: 0; top: 22px; bottom: 22px;
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, var(--moss) 12%, var(--moss) 88%, transparent);
+    opacity: 0.55;
+  }
+
+  .psalm-number-row{
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .psalm-number{
+    font-family:'Gowun Batang', serif;
+    font-size: 15px;
+    color: var(--moss-deep);
+    letter-spacing: 0.04em;
+  }
+  .psalm-title{
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .psalm-body{
+    margin-top: 22px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 17px;
+    line-height: 2.1;
+    color: var(--ink);
+  }
+  .verse-line{
+    display:flex;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+  .verse-num{
+    flex-shrink:0;
+    width: 20px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 600;
+    padding-top: 7px;
+    font-family:'Pretendard', sans-serif;
+  }
+  .verse-text{ flex:1; }
+
+  .psalm-empty{
+    font-family:'Noto Serif KR', serif;
+    font-size: 14px;
+    line-height: 2;
+    color: var(--ink-soft);
+    background: rgba(75,93,68,0.06);
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    padding: 24px;
+    text-align:center;
+    margin-top: 18px;
+  }
+
+  /* ===== 셀라 마커 (시그니처 요소) ===== */
+  .selah-rest{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 16px;
+    margin: 46px 0 8px;
+  }
+  .selah-rest .rule{
+    height:1px; flex:1;
+    background: var(--line);
+  }
+  .selah-rest .mark{
+    font-family:'Gowun Batang', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ember);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  /* ===== 녹음 섹션 ===== */
+  .record-zone{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    margin: 36px 0 12px;
+  }
+
+  .rec-button{
+    position: relative;
+    width: 108px; height: 108px;
+    border-radius: 50%;
+    border: 2px solid var(--moss);
+    background: var(--paper);
+    color: var(--moss-deep);
+    font-family:'Gowun Batang', serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: all 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rec-button:hover{
+    background: var(--moss);
+    color: var(--paper);
+  }
+  .rec-button:focus-visible{
+    outline: 2px solid var(--ember);
+    outline-offset: 4px;
+  }
+  .rec-button.recording{
+    background: var(--ember);
+    border-color: var(--ember);
+    color: var(--paper);
+    animation: pulse 1.6s infinite ease-in-out;
+  }
+  @keyframes pulse{
+    0%,100%{ box-shadow: 0 0 0 0 var(--rec-pulse); }
+    50%{ box-shadow: 0 0 0 14px transparent; }
+  }
+  .rec-button.has-audio{
+    border-color: var(--gold);
+  }
+  .rec-button .rec-icon{
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ember);
+    margin-right: 0;
+  }
+  .rec-button.recording .rec-icon{
+    background: var(--paper);
+    border-radius: 4px;
+    width: 13px; height: 13px;
+  }
+  .rec-label{
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+    min-height: 16px;
+    text-align:center;
+  }
+
+  .audio-player-wrap{
+    margin-top: 18px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .audio-player-wrap audio{
+    height: 32px;
+  }
+  .audio-redo{
+    font-size: 12px;
+    color: var(--ink-soft);
+    background:none;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor:pointer;
+    font-family:'Pretendard', sans-serif;
+  }
+  .audio-redo:hover{ background: var(--linen); }
+
+  /* ===== 한 구절 메모 ===== */
+  .reflect-zone{
+    margin-top: 48px;
+  }
+  .reflect-label{
+    display:flex;
+    align-items:baseline;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .reflect-label .star{
+    color: var(--ember);
+    font-size: 13px;
+  }
+  .reflect-label .txt{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .reflect-box{
+    width: 100%;
+    min-height: 88px;
+    background: var(--paper);
+    border: 2px solid var(--moss);
+    border-radius: 2px;
+    padding: 16px 18px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--ink);
+    resize: vertical;
+    outline: none;
+  }
+  .reflect-box:focus{
+    border-color: var(--ember);
+  }
+  .reflect-box::placeholder{
+    color: rgba(90,83,74,0.55);
+    font-style: italic;
+  }
+  .reflect-meta{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .save-state{
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .save-state.show{ opacity: 0.75; }
+
+  /* ===== 하단 내비 ===== */
+  .footer-nav{
+    margin-top: 56px;
+    display:flex;
+    justify-content: center;
+    gap: 28px;
+  }
+  .nav-link{
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    cursor:pointer;
+    border:none;
+    background:none;
+    font-family:'Pretendard', sans-serif;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .nav-link:hover{ border-color: var(--ink-soft); }
+
+  .archive-note{
+    text-align:center;
+    margin-top: 18px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+
+  /* ===== 묵상 모음 모달 ===== */
+  .modal-overlay{
+    position: fixed; inset:0;
+    background: rgba(43,39,34,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 50;
+    padding: 24px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background: var(--paper);
+    border-radius: 4px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 78vh;
+    overflow-y: auto;
+    padding: 32px;
+    border: 1px solid var(--line);
+  }
+  .modal-box h2{
+    font-family:'Gowun Batang', serif;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .modal-box .modal-sub{
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+  .archive-item{
+    border-bottom: 1px solid var(--line);
+    padding: 16px 0;
+  }
+  .archive-item:last-child{ border-bottom:none; }
+  .archive-item .a-date{
+    font-size: 11px;
+    color: var(--gold);
+    font-weight:600;
+    margin-bottom: 6px;
+  }
+  .archive-item .a-text{
+    font-family:'Noto Serif KR', serif;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+  .archive-empty{
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    padding: 30px 0;
+  }
+  .modal-close{
+    display:block;
+    margin: 24px auto 0;
+    background:none;
+    border: 1px solid var(--ink-soft);
+    border-radius: 20px;
+    padding: 8px 22px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor:pointer;
+    font-family:'Pretendard', sans-serif;
+  }
+
+  @media (max-width: 480px){
+    .stage{ padding: 40px 18px 60px; }
+    .masthead h1{ font-size: 32px; }
+    .psalm-card{ padding: 32px 22px 28px; }
+    .psalm-body{ font-size: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .rec-button.recording{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <header class="masthead">
+    <div class="eyebrow">Half-Time Devotion</div>
+    <h1>Selah<span class="selah-mark">,</span> 시편 쉼표</h1>
+    <div class="subtitle">찬송 생활의 힘</div>
+    <div class="verse-divider"></div>
+    <p class="intent">
+      셀라는 '쉼표'라는 의미를 담고 있습니다. 잠시 멈추어 앞의 말씀을 묵상하고, 하나님께서 주신 은혜를 되새기며 다음 걸음을 준비하는 시간입니다.<br><br>
+      상반기와 하반기 사이에 놓인 이 하프타임 동안, 우리는 시편의 말씀으로 영혼에 쉼표를 두고 찬송 안에서 새 힘을 얻고자 합니다. 감사와 예배로 마음을 새롭게 하며, 하나님 안에서 다시 힘있게 나아가는 시간이 되기를 소망합니다.
+    </p>
+  </header>
+
+  <div class="progress-strip">
+    <span class="date" id="todayDate">-</span>
+    <span class="dot"></span>
+    <span class="count" id="psalmCount">제 - 편 · 150편 중</span>
+  </div>
+
+  <div class="book-stage" id="bookStage">
+    <main class="psalm-card" id="psalmCard">
+      <div class="psalm-number-row">
+        <span class="psalm-number" id="psalmNumberLabel">제 - 편</span>
+        <span class="psalm-title" id="psalmTitleLabel"></span>
+      </div>
+
+      <div class="psalm-body" id="psalmBody"></div>
+    </main>
+  </div>
+
+  <div class="selah-rest">
+    <span class="rule"></span>
+    <span class="mark">— selah, 잠시 머무십시오 —</span>
+    <span class="rule"></span>
+  </div>
+
+  <section class="record-zone">
+    <button class="rec-button" id="recBtn" aria-pressed="false">
+      <span id="recBtnLabel">녹음</span>
+    </button>
+    <div class="rec-label" id="recLabel">오늘 본문을 소리 내어 읽어보세요</div>
+
+    <div class="audio-player-wrap" id="audioWrap" style="display:none;">
+      <audio id="audioPlayer" controls></audio>
+      <button class="audio-redo" id="redoBtn">다시 녹음</button>
+    </div>
+  </section>
+
+  <section class="reflect-zone">
+    <div class="reflect-label">
+      <span class="star">＊</span>
+      <span class="txt">마음에 남는 한 구절을 타이핑하며 되새겨보세요.<br>오늘 적은 글은 나만 볼 수 있어요.</span>
+    </div>
+    <textarea
+      class="reflect-box"
+      id="reflectBox"
+      placeholder="오늘 마음에 남은 한 구절을 적어보세요…"
+    ></textarea>
+    <div class="reflect-meta">
+      <span id="charCount">0자</span>
+      <span class="save-state" id="saveState">저장됨</span>
+    </div>
+  </section>
+
+  <nav class="footer-nav">
+    <button class="nav-link" id="prevDayBtn">← 어제 본문 다시 읽기</button>
+    <button class="nav-link" id="archiveBtn">나의 묵상 모음 보기</button>
+  </nav>
+  <div class="archive-note">매일 자정, 다음 시편으로 자동으로 넘어갑니다</div>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h2>나의 묵상 모음</h2>
+    <div class="modal-sub">지금까지 적어온 한 구절들</div>
+    <div id="archiveList"></div>
+    <button class="modal-close" id="modalCloseBtn">닫기</button>
+  </div>
+</div>
+
+<script src="psalms-data.js"></script>
+<script>
+(function(){
+  // ---------- 날짜 → 시편 번호 매핑 ----------
+  const EPOCH = new Date('2024-01-01T00:00:00');
+
+  function dateToDayIndex(d){
+    const diffMs = d.setHours(0,0,0,0) - new Date(EPOCH).setHours(0,0,0,0);
+    return Math.floor(diffMs / 86400000);
+  }
+
+  function getPsalmForDate(d){
+    const dayIndex = dateToDayIndex(new Date(d));
+    const mod = ((dayIndex % 150) + 150) % 150; // 음수 방지
+    return PSALMS[mod];
+  }
+
+  function formatDate(d){
+    const y = d.getFullYear();
+    const m = d.getMonth()+1;
+    const day = d.getDate();
+    const week = ['일','월','화','수','목','금','토'][d.getDay()];
+    return `${y}.${String(m).padStart(2,'0')}.${String(day).padStart(2,'0')} (${week})`;
+  }
+
+  // ---------- 상태 ----------
+  let viewingDate = new Date();
+  let isViewingPast = false;
+
+  const els = {
+    todayDate: document.getElementById('todayDate'),
+    psalmCount: document.getElementById('psalmCount'),
+    bookStage: document.getElementById('bookStage'),
+    psalmCard: document.getElementById('psalmCard'),
+    psalmNumberLabel: document.getElementById('psalmNumberLabel'),
+    psalmTitleLabel: document.getElementById('psalmTitleLabel'),
+    psalmBody: document.getElementById('psalmBody'),
+    recBtn: document.getElementById('recBtn'),
+    recBtnLabel: document.getElementById('recBtnLabel'),
+    recLabel: document.getElementById('recLabel'),
+    audioWrap: document.getElementById('audioWrap'),
+    audioPlayer: document.getElementById('audioPlayer'),
+    redoBtn: document.getElementById('redoBtn'),
+    reflectBox: document.getElementById('reflectBox'),
+    charCount: document.getElementById('charCount'),
+    saveState: document.getElementById('saveState'),
+    prevDayBtn: document.getElementById('prevDayBtn'),
+    archiveBtn: document.getElementById('archiveBtn'),
+    modalOverlay: document.getElementById('modalOverlay'),
+    modalCloseBtn: document.getElementById('modalCloseBtn'),
+    archiveList: document.getElementById('archiveList'),
+  };
+
+  function dateKey(d){
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // ---------- 페이지 전환 (모션 없음) ----------
+  let isTurning = false;
+
+  function turnPage(newDate){
+    if(isTurning) return;
+    isTurning = true;
+    renderPsalm(newDate);
+    loadDayState(newDate);
+    isTurning = false;
+  }
+
+  // ---------- 렌더링 ----------
+  function renderPsalm(d){
+    const psalm = getPsalmForDate(d);
+    els.todayDate.textContent = formatDate(d) + (isViewingPast ? ' · 이전 본문' : '');
+    els.psalmCount.textContent = `150편 중 ${psalm.number}편`;
+    els.psalmNumberLabel.textContent = `제 ${psalm.number} 편`;
+    els.psalmTitleLabel.textContent = psalm.title ? `[${psalm.title}]` : '';
+
+    if(!psalm.verses || psalm.verses.length === 0){
+      els.psalmBody.innerHTML = `<div class="psalm-empty">아직 본문이 채워지지 않았어요.<br>psalms-data.js 파일에 ${psalm.number}편 본문을 붙여넣어 주세요.</div>`;
+      return;
+    }
+
+    els.psalmBody.innerHTML = psalm.verses.map((v, i) => `
+      <div class="verse-line">
+        <span class="verse-num">${i+1}</span>
+        <span class="verse-text">${v}</span>
+      </div>
+    `).join('');
+  }
+
+  function loadDayState(d){
+    const key = dateKey(d);
+    // 묵상 글
+    let reflectData = {};
+    try{ reflectData = JSON.parse(localStorage.getItem('selah_reflections') || '{}'); }catch(e){}
+    els.reflectBox.value = reflectData[key] || '';
+    updateCharCount();
+
+    // 녹음
+    let audioData = {};
+    try{ audioData = JSON.parse(localStorage.getItem('selah_audio_meta') || '{}'); }catch(e){}
+    if(audioData[key]){
+      const stored = sessionStorage.getItem('selah_audio_blob_' + key);
+      if(stored){
+        els.audioPlayer.src = stored;
+        els.audioWrap.style.display = 'flex';
+        els.recBtn.classList.add('has-audio');
+        els.recLabel.textContent = '녹음을 저장했어요';
+      } else {
+        els.audioWrap.style.display = 'none';
+        els.recBtn.classList.remove('has-audio');
+        els.recLabel.textContent = '오늘 본문을 소리 내어 읽어보세요';
+      }
+    } else {
+      els.audioWrap.style.display = 'none';
+      els.recBtn.classList.remove('has-audio');
+      els.recLabel.textContent = isViewingPast ? '이 날의 녹음 기록은 없어요' : '오늘 본문을 소리 내어 읽어보세요';
+    }
+  }
+
+  function updateCharCount(){
+    els.charCount.textContent = `${els.reflectBox.value.length}자`;
+  }
+
+  function showSaved(){
+    els.saveState.classList.add('show');
+    clearTimeout(showSaved._t);
+    showSaved._t = setTimeout(()=> els.saveState.classList.remove('show'), 1400);
+  }
+
+  // ---------- 묵상 저장 ----------
+  let saveDebounce;
+  els.reflectBox.addEventListener('input', () => {
+    updateCharCount();
+    clearTimeout(saveDebounce);
+    saveDebounce = setTimeout(() => {
+      let reflectData = {};
+      try{ reflectData = JSON.parse(localStorage.getItem('selah_reflections') || '{}'); }catch(e){}
+      const key = dateKey(viewingDate);
+      if(els.reflectBox.value.trim()){
+        reflectData[key] = els.reflectBox.value;
+      } else {
+        delete reflectData[key];
+      }
+      localStorage.setItem('selah_reflections', JSON.stringify(reflectData));
+      showSaved();
+    }, 500);
+  });
+
+  // ---------- 녹음 ----------
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecording = false;
+  let mediaStream = null;
+
+  async function startRecording(){
+    try{
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }catch(err){
+      els.recLabel.textContent = '마이크 권한이 필요해요. 브라우저 설정을 확인해주세요.';
+      return;
+    }
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(mediaStream);
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      els.audioPlayer.src = url;
+      els.audioWrap.style.display = 'flex';
+      els.recBtn.classList.add('has-audio');
+      els.recLabel.textContent = '녹음을 저장했어요';
+
+      const key = dateKey(viewingDate);
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          sessionStorage.setItem('selah_audio_blob_' + key, reader.result);
+        }catch(e){
+          // 저장 공간 초과 시 무시 (재생만 유지)
+        }
+        let audioData = {};
+        try{ audioData = JSON.parse(localStorage.getItem('selah_audio_meta') || '{}'); }catch(e){}
+        audioData[key] = true;
+        localStorage.setItem('selah_audio_meta', JSON.stringify(audioData));
+      };
+      reader.readAsDataURL(blob);
+
+      mediaStream.getTracks().forEach(t => t.stop());
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    els.recBtn.classList.add('recording');
+    els.recBtnLabel.textContent = '정지';
+    els.recLabel.textContent = '녹음 중… 다시 누르면 멈춰요';
+  }
+
+  function stopRecording(){
+    if(mediaRecorder && isRecording){
+      mediaRecorder.stop();
+    }
+    isRecording = false;
+    els.recBtn.classList.remove('recording');
+    els.recBtnLabel.textContent = '녹음';
+  }
+
+  els.recBtn.addEventListener('click', () => {
+    if(isViewingPast){
+      els.recLabel.textContent = '오늘 본문에서만 새로 녹음할 수 있어요';
+      return;
+    }
+    if(isRecording){
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+
+  els.redoBtn.addEventListener('click', () => {
+    els.audioWrap.style.display = 'none';
+    els.recBtn.classList.remove('has-audio');
+    els.recLabel.textContent = '오늘 본문을 소리 내어 읽어보세요';
+    const key = dateKey(viewingDate);
+    sessionStorage.removeItem('selah_audio_blob_' + key);
+    let audioData = {};
+    try{ audioData = JSON.parse(localStorage.getItem('selah_audio_meta') || '{}'); }catch(e){}
+    delete audioData[key];
+    localStorage.setItem('selah_audio_meta', JSON.stringify(audioData));
+  });
+
+  // ---------- 어제 본문 보기 토글 ----------
+  els.prevDayBtn.addEventListener('click', () => {
+    if(isTurning) return;
+    let targetDate;
+    if(!isViewingPast){
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - 1);
+      isViewingPast = true;
+      els.prevDayBtn.textContent = '→ 오늘 본문으로 돌아가기';
+    } else {
+      targetDate = new Date();
+      isViewingPast = false;
+      els.prevDayBtn.textContent = '← 어제 본문 다시 읽기';
+    }
+    viewingDate = targetDate;
+    turnPage(viewingDate);
+  });
+
+  // ---------- 묵상 모음 모달 ----------
+  function openArchive(){
+    let reflectData = {};
+    try{ reflectData = JSON.parse(localStorage.getItem('selah_reflections') || '{}'); }catch(e){}
+    const keys = Object.keys(reflectData).sort().reverse();
+
+    if(keys.length === 0){
+      els.archiveList.innerHTML = `<div class="archive-empty">아직 적은 묵상이 없어요.<br>오늘의 한 구절부터 시작해보세요.</div>`;
+    } else {
+      els.archiveList.innerHTML = keys.map(k => {
+        const d = new Date(k + 'T00:00:00');
+        const psalm = getPsalmForDate(d);
+        return `
+          <div class="archive-item">
+            <div class="a-date">${formatDate(d)} · 제${psalm.number}편</div>
+            <div class="a-text">${escapeHtml(reflectData[k])}</div>
+          </div>
+        `;
+      }).join('');
+    }
+    els.modalOverlay.classList.add('show');
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  els.archiveBtn.addEventListener('click', openArchive);
+  els.modalCloseBtn.addEventListener('click', () => els.modalOverlay.classList.remove('show'));
+  els.modalOverlay.addEventListener('click', (e) => {
+    if(e.target === els.modalOverlay) els.modalOverlay.classList.remove('show');
+  });
+
+  // ---------- 초기화 ----------
+  renderPsalm(viewingDate);
+  loadDayState(viewingDate);
+
+})();
+</script>
+
+</body>
+</html>
